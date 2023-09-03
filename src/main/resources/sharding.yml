@@ -1,0 +1,41 @@
+dataSources:
+  db0:
+    dataSourceClassName: com.alibaba.druid.pool.DruidDataSource
+    driverClassName: com.mysql.jdbc.Driver
+    #jdbcUrl:
+    url: jdbc:mysql://localhost:3306/test?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password:
+
+rules:
+  - !SHARDING
+    tables:
+      list_info:
+        actualDataNodes: db0.list_info_${202309..203001}
+        tableStrategy:
+          standard:
+            shardingColumn: create_time
+            shardingAlgorithmName: month_inline
+        keyGenerateStrategy:
+          column: id
+          keyGeneratorName: snowflake
+    shardingAlgorithms:
+      month_inline:
+        type: INTERVAL
+        props:
+          datetime-pattern: 'yyyy-MM-dd HH:mm:ss'
+          datetime-lower: '2023-01-01 00:00:00'
+          datetime-upper: '2099-01-01 00:00:00'
+          sharding-suffix-pattern: yyyyMM
+          datetime-interval-amount: 1
+          datetime-interval-unit: MONTHS
+    keyGenerators:
+      snowflake:
+        type: SNOWFLAKE
+
+  - !SINGLE
+    tables: # single tables
+      - "*.*"
+#    defaultDataSourceName: db0
+props:
+  sql-show: true
